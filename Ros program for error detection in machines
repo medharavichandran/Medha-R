@@ -1,0 +1,26 @@
+catkin_create_pkg failure_detection rospy std_msgs
+#!/usr/bin/env python
+
+import rospy
+from std_msgs.msg import String
+
+def sensor_callback(data):
+    # Implement your failure detection logic here
+    # Example: Check sensor data for anomalies
+    if data.data == "failure":
+        rospy.logwarn("Failure detected!")
+
+def failure_detector():
+    rospy.init_node('failure_detector', anonymous=True)
+    rospy.Subscriber("sensor_topic", String, sensor_callback)
+    rospy.spin()
+
+if __name__ == '__main__':
+    try:
+        failure_detector()
+    except rospy.ROSInterruptException:
+        pass
+chmod +x failure_detector.py
+roscore
+rosrun failure_detection failure_detector.py
+
