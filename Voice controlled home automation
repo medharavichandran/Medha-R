@@ -1,0 +1,85 @@
+#include <SoftwareSerial.h>
+#include <ArduinoJson.h>
+#include <Wire.h>
+#include <DFRobotDFPlayerMini.h>
+
+#define RXD2 16
+#define TXD2 17
+
+#define DFPLAYER_RX RXD2
+#define DFPLAYER_TX TXD2
+
+SoftwareSerial mySoftwareSerial(RXD2, TXD2); // RX, TX
+DFRobotDFPlayerMini myDFPlayer;
+
+#define relayPin 9 // Pin connected to the relay module
+
+String command = ""; // Variable to store voice command
+bool relayState = false; // Variable to store relay state
+
+void setup() {
+  Serial.begin(9600); // Serial communication for debugging
+  mySoftwareSerial.begin(9600); // SoftwareSerial for DFPlayer
+  Wire.begin();
+  myDFPlayer.begin(mySoftwareSerial);
+
+  // Initialize relay pin as an output
+  pinMode(relayPin, OUTPUT);
+  // Set relay initially to off
+  digitalWrite(relayPin, LOW);
+
+  // Start the voice recognition module
+  Serial.println("Voice recognition module started!");
+}
+
+void loop() {
+  if (Serial.available()) {
+    delay(10);
+    char c = Serial.read();
+    if (c == '#') {
+      break;
+    }
+    command += c;
+  }
+
+  // Check if there is a valid command
+  if (command.length() > 0) {
+    Serial.println("Received command: " + command);
+    // Process the received command
+    processCommand(command);
+    // Clear the command variable
+    command = "";
+  }
+}
+
+// Function to process the received command
+void processCommand(String command) {
+  // Convert the command to lowercase for easier comparison
+  command.toLowerCase();
+
+  // Check for specific keywords in the command
+  if (command.indexOf("turn on") != -1 || command.indexOf("activate") != -1) {
+    // Turn on the relay
+    digitalWrite(relayPin, HIGH);
+    relayState = true;
+    Serial.println("Device turned ON");
+    myDFPlayer.playMp3Folder(1); // play success.mp3
+  } else if (command.indexOf("turn off") != -1 || command.indexOf("deactivate") != -1) {
+    // Turn off the relay
+    digitalWrite(relayPin, LOW);
+    relayState = false;
+    Serial.println("Device turned OFF");
+    myDFPlayer.playMp3Folder(2); // play deactivated.mp3
+  } else if (command.indexOf("status") != -1) {
+    // Report the status of the device
+    if (relayState) {
+      Serial.println("Device is ON");
+    } else {
+      Serial.println("Device is OFF");
+    }
+  } else {
+    // Unknown command
+    Serial.println("Unknown command");
+    myDFPlayer.playMp3Folder(3); // play error.mp3
+  }
+}
