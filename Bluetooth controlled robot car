@@ -1,0 +1,106 @@
+// Motor A connections
+int motor1Pin1 = 2;  // Pin 2 of Arduino connected to IN1 of L298N
+int motor1Pin2 = 3;  // Pin 3 of Arduino connected to IN2 of L298N
+int enable1Pin = 9;   // Pin 9 of Arduino connected to ENA of L298N
+
+// Motor B connections
+int motor2Pin1 = 4;  // Pin 4 of Arduino connected to IN3 of L298N
+int motor2Pin2 = 5;  // Pin 5 of Arduino connected to IN4 of L298N
+int enable2Pin = 10;  // Pin 10 of Arduino connected to ENB of L298N
+
+// Bluetooth module connections
+int bluetoothTx = 0;  // Pin 0 of Arduino connected to TX of Bluetooth module
+int bluetoothRx = 1;  // Pin 1 of Arduino connected to RX of Bluetooth module
+
+char command;  // Variable to store received commands from Bluetooth
+
+void setup() {
+  // Define the motor control pins as outputs
+  pinMode(motor1Pin1, OUTPUT);
+  pinMode(motor1Pin2, OUTPUT);
+  pinMode(enable1Pin, OUTPUT);
+  pinMode(motor2Pin1, OUTPUT);
+  pinMode(motor2Pin2, OUTPUT);
+  pinMode(enable2Pin, OUTPUT);
+  
+  // Set the baud rate for Bluetooth communication
+  Serial.begin(9600);
+  
+  // Set the baud rate for Bluetooth module
+  Serial1.begin(9600);  
+}
+
+void loop(){
+  // Check if data is available to read from Bluetooth module
+  if(Serial1.available() > 0){
+    // Read the incoming data from Bluetooth module
+    command = Serial1.read();
+    
+    // Perform action based on the received command
+    switch(command){
+      case 'F':
+        forward();
+        break;
+      case 'B':
+        backward();
+        break;
+      case 'L':
+        left();
+        break;
+      case 'R':
+        right();
+        break;
+      case 'S':
+        stop();
+        break;
+    }
+  }
+}
+
+// Function to move the car forward
+void forward(){
+  digitalWrite(motor1Pin1, HIGH);
+  digitalWrite(motor1Pin2, LOW);
+  digitalWrite(motor2Pin1, HIGH);
+  digitalWrite(motor2Pin2, LOW);
+  analogWrite(enable1Pin, 255);
+  analogWrite(enable2Pin, 255);
+}
+
+// Function to move the car backward
+void backward(){
+  digitalWrite(motor1Pin1, LOW);
+  digitalWrite(motor1Pin2, HIGH);
+  digitalWrite(motor2Pin1, LOW);
+  digitalWrite(motor2Pin2, HIGH);
+  analogWrite(enable1Pin, 255);
+  analogWrite(enable2Pin, 255);
+}
+
+// Function to turn the car left
+void left(){
+  digitalWrite(motor1Pin1, LOW);
+  digitalWrite(motor1Pin2, HIGH);
+  digitalWrite(motor2Pin1, HIGH);
+  digitalWrite(motor2Pin2, LOW);
+  analogWrite(enable1Pin, 255);
+  analogWrite(enable2Pin, 255);
+}
+
+// Function to turn the car right
+void right(){
+  digitalWrite(motor1Pin1, HIGH);
+  digitalWrite(motor1Pin2, LOW);
+  digitalWrite(motor2Pin1, LOW);
+  digitalWrite(motor2Pin2, HIGH);
+  analogWrite(enable1Pin, 255);
+  analogWrite(enable2Pin, 255);
+}
+
+// Function to stop the car
+void stop(){
+  digitalWrite(motor1Pin1, LOW);
+  digitalWrite(motor1Pin2, LOW);
+  digitalWrite(motor2Pin1, LOW);
+  digitalWrite(motor2Pin2, LOW);
+}
